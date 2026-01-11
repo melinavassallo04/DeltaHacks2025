@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Plus, FileText, Stethoscope, Pill, X } from 'lucide-react'
+import { Calendar, Plus, FileText, Stethoscope, Pill, X, Download, Copy, CheckCircle2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useLocalStorage } from '@/lib/useLocalStorage'
+import { exportToPrintablePage, copyToClipboard, formatDate } from '@/lib/export'
 
 interface TimelineEvent {
   id: string
@@ -14,7 +16,7 @@ interface TimelineEvent {
 }
 
 export default function MedicalTimeline() {
-  const [events, setEvents] = useState<TimelineEvent[]>([])
+  const [events, setEvents] = useLocalStorage<TimelineEvent[]>('timeline-events', [])
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     date: format(new Date(), 'yyyy-MM-dd'), type: 'appointment' as TimelineEvent['type'],
@@ -33,6 +35,38 @@ export default function MedicalTimeline() {
     setShowForm(false)
   }
 
+  const handleExportPDF = () => {
+    const content = events.map(e => `
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">${e.title}</span>
+          <span class="badge">${e.type}</span>
+        </div>
+        <div class="meta"><strong>Date:</strong> ${formatDate(e.date)}</div>
+        ${e.provider ? `<div class="meta"><strong>Provider:</strong> ${e.provider}</div>` : ''}
+        <div class="meta"><strong>Details:</strong> ${e.description}</div>
+      </div>
+    `).join('')
+    exportToPrintablePage('Medical Timeline', `<div class="section"><h2>Timeline Events (${events.length})</h2>${content}</div>`)
+  }
+
+  const [copied, setCopied] = useState(false)
+  
+  const handleCopyToClipboard = async () => {
+    const data = events.map(e => ({
+      Date: new Date(e.date),
+      Type: e.type,
+      Title: e.title,
+      Provider: e.provider || '',
+      Description: e.description
+    }))
+    const success = await copyToClipboard(data)
+    if (success) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -41,10 +75,25 @@ export default function MedicalTimeline() {
             <h2 className="text-2xl font-bold text-gray-900">Medical Timeline</h2>
             <p className="text-gray-600 mt-1">Track your complete medical history</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)}
-            className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">
-            <Plus className="h-5 w-5" /><span>Add Event</span>
-          </button>
+          <div className="flex items-center space-x-2">
+            {events.length > 0 && (
+              <div className="flex items-center space-x-1">
+                <button onClick={handleExportPDF} title="Export as PDF"
+                  className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+                  <Download className="h-4 w-4" /><span className="text-sm">PDF</span>
+                </button>
+                <button onClick={handleCopyToClipboard} title="Copy to Clipboard"
+                  className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+                  {copied ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  <span className="text-sm">{copied ? 'Copied!' : 'Copy'}</span>
+                </button>
+              </div>
+            )}
+            <button onClick={() => setShowForm(!showForm)}
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">
+              <Plus className="h-5 w-5" /><span>Add Event</span>
+            </button>
+          </div>
         </div>
 
         {showForm && (

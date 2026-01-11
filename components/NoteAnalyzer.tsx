@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, FileText, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Search, FileText, AlertCircle, CheckCircle2, Download } from 'lucide-react'
+import { useLocalStorage } from '@/lib/useLocalStorage'
+import { exportToPrintablePage } from '@/lib/export'
 
 interface Analysis {
   concerns: string[]
@@ -11,8 +13,8 @@ interface Analysis {
 }
 
 export default function NoteAnalyzer() {
-  const [noteText, setNoteText] = useState('')
-  const [analysis, setAnalysis] = useState<Analysis | null>(null)
+  const [noteText, setNoteText] = useLocalStorage('note-text', '')
+  const [analysis, setAnalysis] = useLocalStorage<Analysis | null>('note-analysis', null)
 
   const analyzeNote = (text: string): Analysis => {
     const lowerText = text.toLowerCase()
@@ -65,6 +67,39 @@ export default function NoteAnalyzer() {
     setAnalysis(result)
   }
 
+  const handleExportPDF = () => {
+    if (!analysis) return
+    
+    const content = `
+      <div class="section">
+        <h2>Analysis Summary</h2>
+        <p>${analysis.summary}</p>
+      </div>
+      ${analysis.concerns.length > 0 ? `
+        <div class="section">
+          <h2>⚠️ Potential Concerns</h2>
+          <ul>${analysis.concerns.map(c => `<li>${c}</li>`).join('')}</ul>
+        </div>
+      ` : ''}
+      ${analysis.missing.length > 0 ? `
+        <div class="section">
+          <h2>📋 Missing Information</h2>
+          <ul>${analysis.missing.map(m => `<li>${m}</li>`).join('')}</ul>
+        </div>
+      ` : ''}
+      <div class="section">
+        <h2>✅ Recommendations</h2>
+        <ul>${analysis.recommendations.map(r => `<li>${r}</li>`).join('')}</ul>
+      </div>
+      <div class="section">
+        <h2>Original Note</h2>
+        <div class="item" style="white-space: pre-wrap; font-family: monospace;">${noteText}</div>
+      </div>
+    `
+    
+    exportToPrintablePage('Medical Note Analysis', content)
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -89,6 +124,12 @@ export default function NoteAnalyzer() {
 
       {analysis && (
         <div className="space-y-4">
+          <div className="flex justify-end">
+            <button onClick={handleExportPDF} title="Export as PDF"
+              className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+              <Download className="h-4 w-4" /><span className="text-sm">Export Analysis</span>
+            </button>
+          </div>
           <div className="bg-pink-50 border border-pink-200 rounded-lg p-6">
             <FileText className="h-5 w-5 text-pink-600 inline mr-2" />
             <span className="font-semibold text-pink-900">Summary</span>

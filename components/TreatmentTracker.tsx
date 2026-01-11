@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Pill, Plus, X, Calendar } from 'lucide-react'
+import { Pill, Plus, X, Calendar, Download, Copy, CheckCircle2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useLocalStorage } from '@/lib/useLocalStorage'
+import { exportToPrintablePage, copyToClipboard, formatDate } from '@/lib/export'
 
 interface Treatment {
   id: string
@@ -16,7 +18,7 @@ interface Treatment {
 }
 
 export default function TreatmentTracker() {
-  const [treatments, setTreatments] = useState<Treatment[]>([])
+  const [treatments, setTreatments] = useLocalStorage<Treatment[]>('treatments', [])
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     name: '', type: 'medication', startDate: format(new Date(), 'yyyy-MM-dd'),
@@ -30,6 +32,41 @@ export default function TreatmentTracker() {
     setShowForm(false)
   }
 
+  const handleExportPDF = () => {
+    const content = treatments.map(t => `
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">${t.name}</span>
+          <span class="badge">${t.status}</span>
+        </div>
+        <div class="meta"><strong>Type:</strong> ${t.type} | <strong>Started:</strong> ${formatDate(t.startDate)}</div>
+        ${t.dosage ? `<div class="meta"><strong>Dosage:</strong> ${t.dosage}</div>` : ''}
+        ${t.frequency ? `<div class="meta"><strong>Frequency:</strong> ${t.frequency}</div>` : ''}
+        ${t.notes ? `<div class="meta"><strong>Notes:</strong> ${t.notes}</div>` : ''}
+      </div>
+    `).join('')
+    exportToPrintablePage('Treatment Report', `<div class="section"><h2>Treatments (${treatments.length})</h2>${content}</div>`)
+  }
+
+  const [copied, setCopied] = useState(false)
+  
+  const handleCopyToClipboard = async () => {
+    const data = treatments.map(t => ({
+      Name: t.name,
+      Type: t.type,
+      Status: t.status,
+      'Start Date': new Date(t.startDate),
+      Dosage: t.dosage,
+      Frequency: t.frequency,
+      Notes: t.notes
+    }))
+    const success = await copyToClipboard(data)
+    if (success) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -38,10 +75,25 @@ export default function TreatmentTracker() {
             <h2 className="text-2xl font-bold text-gray-900">Treatment Tracker</h2>
             <p className="text-gray-600 mt-1">Monitor treatment effectiveness</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)}
-            className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">
-            <Plus className="h-5 w-5" /><span>Add Treatment</span>
-          </button>
+          <div className="flex items-center space-x-2">
+            {treatments.length > 0 && (
+              <div className="flex items-center space-x-1">
+                <button onClick={handleExportPDF} title="Export as PDF"
+                  className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+                  <Download className="h-4 w-4" /><span className="text-sm">PDF</span>
+                </button>
+                <button onClick={handleCopyToClipboard} title="Copy to Clipboard"
+                  className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+                  {copied ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  <span className="text-sm">{copied ? 'Copied!' : 'Copy'}</span>
+                </button>
+              </div>
+            )}
+            <button onClick={() => setShowForm(!showForm)}
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">
+              <Plus className="h-5 w-5" /><span>Add Treatment</span>
+            </button>
+          </div>
         </div>
 
         {showForm && (

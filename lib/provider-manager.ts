@@ -183,7 +183,7 @@ class ProviderManager {
     try {
       const result = await operation(provider)
       // Success - mark as available
-      if (this.status.get(name)?.consecutiveFailures > 0) {
+      if ((this.status.get(name)?.consecutiveFailures ?? 0) > 0) {
         this.markProviderAvailable(name)
         console.log(`Provider ${name} recovered successfully`)
       }

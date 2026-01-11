@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Users, MessageSquare, Search, Heart, Lock } from 'lucide-react'
+import { format } from 'date-fns'
 
 interface Post {
   id: string
@@ -77,7 +78,7 @@ export default function CommunityConnector() {
           <div key={post.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center space-x-3 mb-2">
               <span className="text-sm font-medium">{post.author}</span>
-              <span className="text-xs text-gray-500">{post.date.toLocaleDateString()}</span>
+              <span className="text-xs text-gray-500">{format(post.date, 'MMM d, yyyy')}</span>
               <span className="px-2 py-1 bg-pink-100 text-pink-800 rounded text-xs">{post.category}</span>
             </div>
             <h3 className="text-lg font-semibold mb-2">{post.title}</h3>

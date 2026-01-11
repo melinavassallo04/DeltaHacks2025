@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageSquare, Copy, CheckCircle2 } from 'lucide-react'
+import { MessageSquare, Copy, CheckCircle2, Download } from 'lucide-react'
+import { useLocalStorage } from '@/lib/useLocalStorage'
+import { exportToPrintablePage } from '@/lib/export'
 
 interface Question {
   id: string
@@ -11,10 +13,10 @@ interface Question {
 }
 
 export default function QuestionGenerator() {
-  const [symptoms, setSymptoms] = useState('')
-  const [concerns, setConcerns] = useState('')
-  const [appointmentType, setAppointmentType] = useState('general')
-  const [questions, setQuestions] = useState<Question[]>([])
+  const [symptoms, setSymptoms] = useLocalStorage('question-symptoms', '')
+  const [concerns, setConcerns] = useLocalStorage('question-concerns', '')
+  const [appointmentType, setAppointmentType] = useLocalStorage('appointment-type', 'general')
+  const [questions, setQuestions] = useLocalStorage<Question[]>('generated-questions', [])
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Static template questions based on appointment type
@@ -54,6 +56,32 @@ export default function QuestionGenerator() {
     }
     // Use template questions - personalized based on appointment type
     setQuestions(getTemplateQuestions())
+  }
+
+  const handleExportPDF = () => {
+    const grouped = questions.reduce((acc, q) => {
+      if (!acc[q.category]) acc[q.category] = []
+      acc[q.category].push(q)
+      return acc
+    }, {} as Record<string, typeof questions>)
+    
+    const content = Object.entries(grouped).map(([category, qs]) => `
+      <h3>${category}</h3>
+      ${qs.map(q => `
+        <div class="question-item">
+          <span class="priority-${q.priority}">[${q.priority.toUpperCase()}]</span> ${q.text}
+        </div>
+      `).join('')}
+    `).join('')
+    
+    exportToPrintablePage('Questions for My Appointment', `
+      <div class="section">
+        <p><strong>Appointment Type:</strong> ${appointmentType}</p>
+        ${symptoms ? `<p><strong>Symptoms:</strong> ${symptoms}</p>` : ''}
+        ${concerns ? `<p><strong>Concerns:</strong> ${concerns}</p>` : ''}
+      </div>
+      <div class="section"><h2>Questions to Ask (${questions.length})</h2>${content}</div>
+    `)
   }
 
   const copy = (text: string, id: string) => {
@@ -99,7 +127,13 @@ export default function QuestionGenerator() {
 
       {questions.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-xl font-bold mb-4">{questions.length} Questions to Ask</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold">{questions.length} Questions to Ask</h3>
+            <button onClick={handleExportPDF} title="Export as PDF"
+              className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+              <Download className="h-4 w-4" /><span className="text-sm">Export PDF</span>
+            </button>
+          </div>
           <div className="space-y-3">
             {questions.map((q) => (
               <div key={q.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">

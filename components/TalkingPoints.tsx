@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Copy, CheckCircle2, Shield } from 'lucide-react'
+import { FileText, Copy, CheckCircle2, Shield, Download } from 'lucide-react'
+import { useLocalStorage } from '@/lib/useLocalStorage'
+import { exportToPrintablePage } from '@/lib/export'
 
 interface TalkingPoint {
   id: string
@@ -12,9 +14,9 @@ interface TalkingPoint {
 }
 
 export default function TalkingPoints() {
-  const [symptoms, setSymptoms] = useState('')
-  const [concerns, setConcerns] = useState('')
-  const [points, setPoints] = useState<TalkingPoint[]>([])
+  const [symptoms, setSymptoms] = useLocalStorage('talking-symptoms', '')
+  const [concerns, setConcerns] = useLocalStorage('talking-concerns', '')
+  const [points, setPoints] = useLocalStorage<TalkingPoint[]>('talking-points', [])
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const getTemplatePoints = (): TalkingPoint[] => {
@@ -85,6 +87,33 @@ export default function TalkingPoints() {
     setPoints(getTemplatePoints())
   }
 
+  const handleExportPDF = () => {
+    const grouped = points.reduce((acc, p) => {
+      if (!acc[p.category]) acc[p.category] = []
+      acc[p.category].push(p)
+      return acc
+    }, {} as Record<string, typeof points>)
+    
+    const content = Object.entries(grouped).map(([category, ps]) => `
+      <h3>${category}</h3>
+      ${ps.map(p => `
+        <div class="item">
+          <p><em>"${p.point}"</em></p>
+          <div class="meta"><strong>Context:</strong> ${p.context}</div>
+          <div class="meta"><strong>When to use:</strong> ${p.whenToUse}</div>
+        </div>
+      `).join('')}
+    `).join('')
+    
+    exportToPrintablePage('Talking Points for My Appointment', `
+      <div class="section">
+        ${symptoms ? `<p><strong>My Symptoms:</strong> ${symptoms}</p>` : ''}
+        ${concerns ? `<p><strong>My Concerns:</strong> ${concerns}</p>` : ''}
+      </div>
+      <div class="section"><h2>Talking Points (${points.length})</h2>${content}</div>
+    `)
+  }
+
   const copy = (text: string, id: string) => {
     navigator.clipboard.writeText(text)
     setCopiedId(id)
@@ -121,7 +150,13 @@ export default function TalkingPoints() {
 
       {points.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-xl font-bold mb-4">{points.length} Talking Points</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold">{points.length} Talking Points</h3>
+            <button onClick={handleExportPDF} title="Export as PDF"
+              className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+              <Download className="h-4 w-4" /><span className="text-sm">Export PDF</span>
+            </button>
+          </div>
           {categories.map((category) => (
                 <div key={category} className="mb-6">
               <div className="flex items-center space-x-2 mb-3">

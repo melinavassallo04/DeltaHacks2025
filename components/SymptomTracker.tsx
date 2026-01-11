@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Clock, Calendar, X, AlertCircle } from 'lucide-react'
+import { Plus, Clock, Calendar, X, AlertCircle, Download, Copy, CheckCircle2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useLocalStorage } from '@/lib/useLocalStorage'
+import { exportToPrintablePage, copyToClipboard, formatDate } from '@/lib/export'
 
 interface Symptom {
   id: string
@@ -16,7 +18,7 @@ interface Symptom {
 }
 
 export default function SymptomTracker() {
-  const [symptoms, setSymptoms] = useState<Symptom[]>([])
+  const [symptoms, setSymptoms] = useLocalStorage<Symptom[]>('symptoms', [])
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     name: '', severity: 5, frequency: 'daily', duration: '', triggers: '', notes: ''
@@ -29,6 +31,44 @@ export default function SymptomTracker() {
     setShowForm(false)
   }
 
+  const handleExportPDF = () => {
+    const content = symptoms.map(s => `
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">${s.name}</span>
+          <span class="badge">${s.severity}/10 severity</span>
+        </div>
+        <div class="meta">
+          <strong>Frequency:</strong> ${s.frequency} | 
+          <strong>Duration:</strong> ${s.duration || 'Not specified'} |
+          <strong>Recorded:</strong> ${formatDate(s.timestamp)}
+        </div>
+        ${s.triggers ? `<div class="meta"><strong>Triggers:</strong> ${s.triggers}</div>` : ''}
+        ${s.notes ? `<div class="meta"><strong>Notes:</strong> ${s.notes}</div>` : ''}
+      </div>
+    `).join('')
+    exportToPrintablePage('Symptom Report', `<div class="section"><h2>Recorded Symptoms (${symptoms.length})</h2>${content}</div>`)
+  }
+
+  const [copied, setCopied] = useState(false)
+  
+  const handleCopyToClipboard = async () => {
+    const data = symptoms.map(s => ({
+      Name: s.name,
+      Severity: s.severity,
+      Frequency: s.frequency,
+      Duration: s.duration,
+      Triggers: s.triggers,
+      Notes: s.notes,
+      Date: new Date(s.timestamp)
+    }))
+    const success = await copyToClipboard(data)
+    if (success) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -37,10 +77,25 @@ export default function SymptomTracker() {
             <h2 className="text-2xl font-bold text-gray-900">Symptom Documentation</h2>
             <p className="text-gray-600 mt-1">Record symptoms with medical-grade precision</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)}
-            className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">
-            <Plus className="h-5 w-5" /><span>Add Symptom</span>
-          </button>
+          <div className="flex items-center space-x-2">
+            {symptoms.length > 0 && (
+              <div className="flex items-center space-x-1">
+                <button onClick={handleExportPDF} title="Export as PDF"
+                  className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+                  <Download className="h-4 w-4" /><span className="text-sm">PDF</span>
+                </button>
+                <button onClick={handleCopyToClipboard} title="Copy to Clipboard"
+                  className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200">
+                  {copied ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  <span className="text-sm">{copied ? 'Copied!' : 'Copy'}</span>
+                </button>
+              </div>
+            )}
+            <button onClick={() => setShowForm(!showForm)}
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">
+              <Plus className="h-5 w-5" /><span>Add Symptom</span>
+            </button>
+          </div>
         </div>
 
         {showForm && (

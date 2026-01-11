@@ -80,13 +80,13 @@ export default function AppPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'symptoms' && <SymptomTracker />}
-        {activeTab === 'questions' && <QuestionGenerator />}
-        {activeTab === 'timeline' && <MedicalTimeline />}
-        {activeTab === 'treatments' && <TreatmentTracker />}
-        {activeTab === 'talking-points' && <TalkingPoints />}
-        {activeTab === 'notes' && <NoteAnalyzer />}
-        {activeTab === 'community' && <CommunityConnector />}
+        <div className={activeTab === 'symptoms' ? '' : 'hidden'}><SymptomTracker /></div>
+        <div className={activeTab === 'questions' ? '' : 'hidden'}><QuestionGenerator /></div>
+        <div className={activeTab === 'timeline' ? '' : 'hidden'}><MedicalTimeline /></div>
+        <div className={activeTab === 'treatments' ? '' : 'hidden'}><TreatmentTracker /></div>
+        <div className={activeTab === 'talking-points' ? '' : 'hidden'}><TalkingPoints /></div>
+        <div className={activeTab === 'notes' ? '' : 'hidden'}><NoteAnalyzer /></div>
+        <div className={activeTab === 'community' ? '' : 'hidden'}><CommunityConnector /></div>
       </main>
 
       <footer className="bg-white/80 backdrop-blur-sm border-t border-pink-200 mt-12">
