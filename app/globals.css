@@ -2,7 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background: linear-gradient(to bottom right, #fdf2f8, #fce7f3, #fbcfe8);
-  min-height: 100vh;
+@layer base {
+  body {
+    background: linear-gradient(to bottom right, #fdf2f8, #fce7f3, #fbcfe8);
+    min-height: 100vh;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-family: var(--font-outfit);
+  }
+
+  p, span, div, button, input, textarea, select, label {
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  @keyframes gradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+  }
 }

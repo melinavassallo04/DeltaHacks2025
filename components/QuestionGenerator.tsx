@@ -93,8 +93,8 @@ export default function QuestionGenerator() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Question Generator</h2>
-        <p className="text-gray-600 mb-6">Get helpful questions for your appointment</p>
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">Question Generator</h2>
+        <p className="text-gray-600 mb-6 text-sm">Get helpful questions for your appointment</p>
 
         <div className="space-y-4 mb-6">
           <div>
@@ -118,7 +118,7 @@ export default function QuestionGenerator() {
           </div>
 
           <button onClick={handleGenerate}
-            className="w-full bg-gradient-to-r from-pink-400 to-rose-500 text-white px-6 py-3 rounded-lg hover:from-pink-500 hover:to-rose-600 flex items-center justify-center space-x-2">
+            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-2.5 rounded-lg hover:from-pink-600 hover:to-rose-600 flex items-center justify-center space-x-2 font-semibold shadow-sm hover:shadow-md transition-all">
             <MessageSquare className="h-5 w-5" />
             <span>Show Questions</span>
           </button>

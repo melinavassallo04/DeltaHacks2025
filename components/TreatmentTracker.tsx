@@ -69,11 +69,11 @@ export default function TreatmentTracker() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Treatment Tracker</h2>
-            <p className="text-gray-600 mt-1">Monitor treatment effectiveness</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Treatment Tracker</h2>
+            <p className="text-gray-600 mt-1.5 text-sm">Monitor treatment effectiveness</p>
           </div>
           <div className="flex items-center space-x-2">
             {treatments.length > 0 && (
@@ -90,7 +90,7 @@ export default function TreatmentTracker() {
               </div>
             )}
             <button onClick={() => setShowForm(!showForm)}
-              className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-4 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-400 to-rose-500 text-white px-5 py-2.5 rounded-xl hover:from-pink-500 hover:to-rose-600 font-bold shadow-glow hover:shadow-glow-lg transition-all transform hover:scale-105 active:scale-100">
               <Plus className="h-5 w-5" /><span>Add Treatment</span>
             </button>
           </div>
@@ -136,7 +136,7 @@ export default function TreatmentTracker() {
               </div>
             </div>
             <div className="flex space-x-3">
-              <button type="submit" className="bg-gradient-to-r from-pink-400 to-rose-500 text-white px-6 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">Save</button>
+              <button type="submit" className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-2 rounded-lg hover:from-pink-600 hover:to-rose-600 font-semibold shadow-sm hover:shadow-md transition-all">Save</button>
               <button type="button" onClick={() => setShowForm(false)} className="bg-gray-200 px-6 py-2 rounded-lg">Cancel</button>
             </div>
           </form>
@@ -161,7 +161,7 @@ export default function TreatmentTracker() {
                         {t.status}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-700">
                       <p><Calendar className="h-3 w-3 inline" /> Started: {format(t.startDate, 'MMM d, yyyy')}</p>
                       {t.dosage && <p>Dosage: {t.dosage}</p>}
                       {t.frequency && <p>Frequency: {t.frequency}</p>}

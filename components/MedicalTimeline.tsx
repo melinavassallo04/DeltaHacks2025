@@ -69,11 +69,11 @@ export default function MedicalTimeline() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Medical Timeline</h2>
-            <p className="text-gray-600 mt-1">Track your complete medical history</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Medical Timeline</h2>
+            <p className="text-gray-600 mt-1.5 text-sm">Track your complete medical history</p>
           </div>
           <div className="flex items-center space-x-2">
             {events.length > 0 && (
@@ -133,7 +133,7 @@ export default function MedicalTimeline() {
               </div>
             </div>
             <div className="flex space-x-3">
-              <button type="submit" className="bg-gradient-to-r from-pink-400 to-rose-500 text-white px-6 py-2 rounded-lg hover:from-pink-500 hover:to-rose-600">Save</button>
+              <button type="submit" className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-2 rounded-lg hover:from-pink-600 hover:to-rose-600 font-semibold shadow-sm hover:shadow-md transition-all">Save</button>
               <button type="button" onClick={() => setShowForm(false)} className="bg-gray-200 px-6 py-2 rounded-lg">Cancel</button>
             </div>
           </form>
@@ -142,7 +142,7 @@ export default function MedicalTimeline() {
         {events.length === 0 ? (
           <div className="text-center py-12">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No events yet</p>
+            <p className="text-gray-700">No events yet</p>
           </div>
         ) : (
           <div className="relative">

@@ -45,9 +45,9 @@ export default function CommunityConnector() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Community</h2>
-        <p className="text-gray-600 mb-6">Connect with others who understand your journey</p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 tracking-tight">Community</h2>
+        <p className="text-gray-600 mb-6 text-sm">Connect with others who understand your journey</p>
 
         <div className="space-y-4 mb-6">
           <div className="relative">
@@ -75,7 +75,7 @@ export default function CommunityConnector() {
 
       <div className="space-y-4">
         {filtered.map((post) => (
-          <div key={post.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div key={post.id} className="bg-white rounded-2xl shadow-soft border-2 border-gray-100 p-6 hover:shadow-glow-lg transition-all hover:-translate-y-1">
             <div className="flex items-center space-x-3 mb-2">
               <span className="text-sm font-medium">{post.author}</span>
               <span className="text-xs text-gray-500">{format(post.date, 'MMM d, yyyy')}</span>
